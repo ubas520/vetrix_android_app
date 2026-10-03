@@ -1,0 +1,78 @@
+{
+  "expo": {
+    "name": "Vetrix",
+    "icon": "./src/assets/images/app-icon.png",
+    "slug": "vet-clinic-client-mobile",
+    "version": "1.0.1",
+    "runtimeVersion": "1.0.1",
+    "updates": {
+      "enabled": true,
+      "url": "https://u.expo.dev/5b01542c-5442-4863-a4ab-97785bd9c7ba",
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0,
+      "requestHeaders": {
+        "expo-channel-name": "production"
+      }
+    },
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#F8FAFE",
+    "primaryColor": "#3569F4",
+    "scheme": "vetclinicclient",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vetclinic.clientmobile"
+    },
+    "android": {
+      "versionCode": 4,
+      "package": "com.vetclinic.clientmobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/images/adaptive-paw.png",
+        "backgroundColor": "#F8FAFE"
+      }
+    },
+    "extra": {
+      "apiIntegration": "mobile-v1",
+      "apiUrlEnvironmentVariable": "EXPO_PUBLIC_VETRIX_API_URL",
+      "authTokenStorage": "expo-secure-store",
+      "eas": {
+        "projectId": "5b01542c-5442-4863-a4ab-97785bd9c7ba"
+      }
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F8FAFE",
+          "image": "./src/assets/images/splash-paw.png",
+          "imageWidth": 120,
+          "resizeMode": "contain"
+        }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./node_modules/@expo-google-fonts/manrope/400Regular/Manrope_400Regular.ttf",
+            "./node_modules/@expo-google-fonts/manrope/500Medium/Manrope_500Medium.ttf",
+            "./node_modules/@expo-google-fonts/manrope/600SemiBold/Manrope_600SemiBold.ttf",
+            "./node_modules/@expo-google-fonts/manrope/700Bold/Manrope_700Bold.ttf",
+            "./node_modules/@expo-google-fonts/manrope/800ExtraBold/Manrope_800ExtraBold.ttf"
+          ]
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Vetrix to choose a pet profile photo.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-secure-store",
+      "expo-status-bar"
+    ],
+    "owner": "justinegrape"
+  }
+}

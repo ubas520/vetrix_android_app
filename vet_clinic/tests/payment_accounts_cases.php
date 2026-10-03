@@ -1,0 +1,45 @@
+<?php
+// Included by product_orders_test.php inside its disposable database.
+$bankInput = ['method'=>'bank','provider'=>'TEST BANK','account_name'=>'TEST ONLY - NO TRANSFERS','account_number'=>'1234567890','confirmed'=>'yes'];
+rejects(fn()=>order_save_account($conn,4,$bankInput),403,'clients cannot configure recipients');
+rejects(fn()=>order_save_account($conn,3,array_merge($bankInput,['confirmed'=>'no'])),422,'recipient confirmation required');
+rejects(fn()=>order_save_account($conn,3,array_merge($bankInput,['account_number'=>'<script>'])),422,'invalid account rejected');
+rejects(fn()=>order_account_image(['error'=>UPLOAD_ERR_INI_SIZE]),422,'oversized upload rejected');
+$bankId = order_save_account($conn,3,$bankInput,['data'=>$image,'mime'=>'image/png']);
+$bankAccount = order_accounts($conn)[0];
+expect($bankAccount['id']===$bankId && $bankAccount['qr_url']!==null,'bank QR returned to clients');
+expect(!array_key_exists('qr_data',$bankAccount),'QR bytes excluded from API lists');
+$bankPayload = array_merge(payload(1,'bank'),['payment_account_id'=>$bankId]);
+$bankOrder = order_create($conn,4,$bankPayload);
+$bankOrderId = $bankOrder['id'];
+expect($bankOrder['payment_recipient']['account_number']==='1234567890','bank recipient saved on order');
+rejects(fn()=>order_update($conn,3,$bankOrderId,'ready',[],true),409,'unpaid bank order cannot be ready');
+rejects(fn()=>order_create($conn,4,array_merge(payload(1,'gcash'),['payment_account_id'=>$bankId])),409,'method must match account');
+$replacement = order_save_account($conn,3,array_merge($bankInput,['replace_id'=>$bankId,'account_number'=>'9876543210']));
+expect(order_get($conn,$bankOrderId)['payment_recipient']['qr_url']===$bankAccount['qr_url'],'replacement preserves old order QR');
+expect(order_get($conn,$bankOrderId)['payment_recipient']['account_number']==='1234567890','replacement preserves old recipient');
+expect(order_create($conn,4,$bankPayload)['id']===$bankOrderId,'checkout retry survives recipient replacement');
+rejects(fn()=>order_create($conn,4,array_merge(payload(1,'bank'),['payment_account_id'=>$bankId])),409,'disabled account cannot receive new orders');
+rejects(fn()=>order_create($conn,4,array_merge($bankPayload,['payment_account_id'=>$replacement])),409,'checkout retry cannot change recipient');
+$review = order_save_proof($conn,4,$bankOrderId,'BANK-ABC123',$image,'image/png');
+expect($review['payment_status']==='under_review','bank proof awaits staff verification');
+expect(order_save_proof($conn,4,$bankOrderId,'BANKABC123',$image,'image/png')['proof']['id']===$review['proof']['id'],'bank proof retry is idempotent');
+rejects(fn()=>order_update($conn,3,$bankOrderId,'verify',['proof_id'=>$review['proof']['id']],true),422,'bank transfer requires staff confirmation');
+$verified=order_update($conn,3,$bankOrderId,'verify',['proof_id'=>$review['proof']['id'],'confirmed'=>'yes'],true);
+expect($verified['payment_status']==='paid' && $verified['transaction_id']!==null,'bank verification records sale');
+if ($modern) expect(scalar($conn,'SELECT payment_method FROM pos_transactions WHERE id='.(int)$verified['transaction_id'])==='qr','bank sale uses electronic receipt');
+order_update($conn,3,$bankOrderId,'ready',[],true);
+order_update($conn,3,$bankOrderId,'complete',[],true);
+// Re-adding the same receiving account must not allow reuse of a paid reference.
+$sameBank = order_save_account($conn,3,$bankInput);
+$duplicate = order_create($conn,5,array_merge(payload(1,'bank'),['payment_account_id'=>$sameBank]));
+rejects(fn()=>order_save_proof($conn,5,$duplicate['id'],'BANKABC123',$image,'image/png'),409,'bank reference cannot pay a second order');
+order_update($conn,5,$duplicate['id'],'cancel');
+$gcashId = order_save_account($conn,3,['method'=>'gcash','account_name'=>'TEST WALLET','account_number'=>'09000000000','confirmed'=>'yes'],['data'=>$image,'mime'=>'image/png']);
+expect(order_payment_options($conn)['gcash']['id']===$gcashId,'old app clients receive current GCash recipient');
+$wallet = order_create($conn,5,payload(1,'gcash'));
+expect($wallet['payment_recipient']['qr_url']!==null && $wallet['gcash_name']==='TEST WALLET','legacy GCash checkout snapshots new QR and retains old fields');
+order_disable_account($conn,3,$gcashId);
+expect(!order_payment_options($conn)['gcash']['enabled'],'disabling wallet does not revive legacy recipient');
+expect(order_get($conn,$wallet['id'])['payment_recipient']['qr_url']!==null,'disabled wallet QR remains usable for existing order');
+order_update($conn,5,$wallet['id'],'cancel');

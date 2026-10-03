@@ -1,0 +1,7 @@
+Update applied:
+- Added Pets module to the Vet side.
+- Admin Pets menu renamed to Pet Verification for admin monitoring/approval.
+- Vet can edit pet details and optionally replace pet photo.
+- Client receives a notification whenever a vet edits pet details.
+- Client My Pets now shows the latest vet editor details for transparency.
+- Added pet_update_logs table and migration.

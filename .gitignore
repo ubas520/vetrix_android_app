@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+
+# Expo and generated app output
+.expo/
+.expo-*/
+dist/
+dist-*/
+web-build/
+expo-env.d.ts
+ios/
+android/
+.kotlin/
+.metro-health-check*
+
+# Test, browser, and temporary output
+.headless-*/
+.visual-check/
+.cache/
+.tmp/
+coverage/
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Local secrets and credentials
+.env
+.env.*
+!.env.example
+vet_clinic/config/mail.local.php
+*.pem
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Workspace snapshots and tool scratch directories
+/.codex-tmp-*/
+/*.zip
+
+# Operating-system and compiler output
+.DS_Store
+*.orig.*
+*.tsbuildinfo
+vet_clinic/config/payments.local.php

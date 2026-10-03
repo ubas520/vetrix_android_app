@@ -1,0 +1,18 @@
+Pet Admin Verification Update
+
+Added features:
+1. Client pet registration now requires complete pet details and a pet picture.
+2. Newly submitted client pets are saved with Pending verification status.
+3. Admin can update pet verification status to Pending, Approved, Rejected, or In-person Confirmation.
+4. Approved pets automatically receive an active QR token if they do not already have one.
+5. Only approved pets are treated as active in key areas like appointment requests, QR access, records, vaccinations, reports, dashboards, and mobile summary.
+6. Staff can submit walk-in pets, but these are still pending until admin verification.
+
+Database update:
+- Fresh import: use the updated database.sql.
+- Existing database: run migrations/pet_admin_verification_update.sql in phpMyAdmin.
+
+Pet picture uploads:
+- Uploaded pet photos are saved in uploads/pets/.
+- Accepted image types: JPG, PNG, WEBP.
+- Maximum file size: 3MB.

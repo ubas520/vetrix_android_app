@@ -1,0 +1,19 @@
+{
+  "cli": {
+    "appVersionSource": "local"
+  },
+  "build": {
+    "apk": {
+      "channel": "production",
+      "distribution": "internal",
+      "environment": "production",
+      "env": {
+        "EXPO_PUBLIC_VETRIX_API_URL": "https://vetrixwebapp-production.up.railway.app/api/mobile/v1",
+        "EXPO_PUBLIC_VETRIX_WEBSITE_URL": "https://vetrixwebapp-production.up.railway.app"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    }
+  }
+}
