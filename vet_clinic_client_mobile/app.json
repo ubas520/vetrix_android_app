@@ -2,12 +2,12 @@
   "expo": {
     "name": "Vetrix",
     "icon": "./src/assets/images/app-icon.png",
-    "slug": "vet-clinic-client-mobile",
+    "slug": "vetrixmobileapp",
     "version": "1.0.1",
     "runtimeVersion": "1.0.1",
     "updates": {
       "enabled": true,
-      "url": "https://u.expo.dev/5b01542c-5442-4863-a4ab-97785bd9c7ba",
+      "url": "https://u.expo.dev/23f4671e-4f3c-4e10-a594-5ce72fb74817",
       "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 0,
       "requestHeaders": {
@@ -36,7 +36,7 @@
       "apiUrlEnvironmentVariable": "EXPO_PUBLIC_VETRIX_API_URL",
       "authTokenStorage": "expo-secure-store",
       "eas": {
-        "projectId": "5b01542c-5442-4863-a4ab-97785bd9c7ba"
+        "projectId": "23f4671e-4f3c-4e10-a594-5ce72fb74817"
       }
     },
     "plugins": [

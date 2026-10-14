@@ -63,7 +63,7 @@ export default function SignupScreen({ navigation }) {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}> 
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboard}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} enabled={Platform.OS !== 'web'} style={styles.keyboard}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <Pressable accessibilityLabel="Back to login" disabled={submitting} onPress={() => navigation.goBack()} style={[styles.back, { backgroundColor: colors.surface, borderColor: colors.line }]}><AppIcon name="back" color={colors.primaryDark} size={20} /></Pressable>
           <View style={styles.brandRow}>

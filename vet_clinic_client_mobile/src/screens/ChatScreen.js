@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import AppCard from '../components/AppCard';
@@ -60,103 +60,105 @@ export default function ChatScreen({ navigation }) {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColors.background }]}>
       <NotificationPanel visible={panelOpen} onClose={() => setPanelOpen(false)} />
-      <ScrollView ref={scrollRef} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        <StackHeader
-          navigation={navigation}
-          title="Vetrix Assistant"
-          action={<NotificationBell count={unreadCount} onPress={() => setPanelOpen(true)} />}
-        />
-
-        <View style={styles.intro}>
-          <View style={[styles.assistantIcon, { backgroundColor: themeColors.primary }]}> 
-            <AppIcon name="assistant" color="#FFFFFF" size={25} />
-          </View>
-          <View style={styles.introCopy}>
-            <Text style={[styles.title, { color: themeColors.ink }]}>How can I help?</Text>
-            <Text style={[styles.subtitle, { color: themeColors.muted }]}>On-device pet-care guidance. Urgent symptoms need a veterinarian.</Text>
-          </View>
-        </View>
-
-        <View style={[styles.chatBox, { backgroundColor: themeColors.surface, borderColor: themeColors.line }]}>
-          {messages.map((message) => (
-            <View
-              key={message.id}
-              style={[
-                styles.bubble,
-                message.type === 'user'
-                  ? [styles.userBubble, { backgroundColor: themeColors.primary }]
-                  : [styles.botBubble, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.line }],
-              ]}>
-              {message.type === 'bot' ? <Text style={[styles.botName, { color: themeColors.primaryDark }]}>Vetrix guide</Text> : null}
-              {message.triage ? <Text style={[styles.triage, triageStyle(message.triage, themeColors)]}>Triage: {message.triage}</Text> : null}
-              <Text style={[styles.bubbleText, { color: themeColors.ink }, message.type === 'user' && { color: primaryActionText }]}>{message.text}</Text>
-              {message.questions?.length ? (
-                <View style={[styles.questionBlock, { borderTopColor: themeColors.line }]}>
-                  <Text style={[styles.questionTitle, { color: themeColors.ink }]}>Follow-up questions</Text>
-                  {message.questions.map((question) => (
-                    <Text key={question} style={[styles.questionText, { color: themeColors.muted }]}>- {question}</Text>
-                  ))}
-                </View>
-              ) : null}
-              {message.safetyNote ? <Text style={styles.safetyNote}>{message.safetyNote}</Text> : null}
-            </View>
-          ))}
-          {typing ? (
-            <View style={[styles.bubble, styles.botBubble, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.line }]}>
-              <Text style={[styles.botName, { color: themeColors.primaryDark }]}>Vetrix guide</Text>
-              <Text style={[styles.bubbleText, { color: themeColors.ink }]}>Preparing clear guidance...</Text>
-            </View>
-          ) : null}
-        </View>
-
-        <View style={styles.chips}>
-          {quickQuestions.map((item) => (
-            <Pressable
-              key={item.label}
-              style={[styles.chip, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.lineStrong }]}
-              onPress={() => sendMessage(item.message)}>
-              <Text style={[styles.chipText, { color: themeColors.primaryDark }]}>{item.label}</Text>
-            </Pressable>
-          ))}
-        </View>
-
-        <View style={[styles.inputRow, { backgroundColor: themeColors.surface, borderColor: themeColors.line }]}>
-          <TextInput
-            value={input}
-            onChangeText={setInput}
-            placeholder="Describe your pet concern"
-            placeholderTextColor={themeColors.muted}
-            style={[styles.input, { color: themeColors.ink }]}
-            multiline
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} enabled={Platform.OS !== 'web'}>
+        <ScrollView ref={scrollRef} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+          <StackHeader
+            navigation={navigation}
+            title="Vetrix Assistant"
+            action={<NotificationBell count={unreadCount} onPress={() => setPanelOpen(true)} />}
           />
-          <Pressable accessibilityLabel="Send message" style={[styles.sendButton, { backgroundColor: themeColors.primary }]} onPress={() => sendMessage(input)}>
-            <AppIcon name="send" color={primaryActionText} size={18} />
-          </Pressable>
-        </View>
 
-        <Text style={[styles.footerNote, { color: themeColors.muted }]}>
-          This assistant gives general guidance only. Severe, fast-changing, or persistent symptoms need a veterinarian.
-        </Text>
+          <View style={styles.intro}>
+            <View style={[styles.assistantIcon, { backgroundColor: themeColors.primary }]}> 
+              <AppIcon name="assistant" color="#FFFFFF" size={25} />
+            </View>
+            <View style={styles.introCopy}>
+              <Text style={[styles.title, { color: themeColors.ink }]}>How can I help?</Text>
+              <Text style={[styles.subtitle, { color: themeColors.muted }]}>On-device pet-care guidance. Urgent symptoms need a veterinarian.</Text>
+            </View>
+          </View>
 
-        <AppCard elevated={false} style={[styles.apiCard, { backgroundColor: themeColors.surface, borderColor: themeColors.line }]}>
-          <Pressable style={styles.apiToggle} onPress={() => setApiOpen((value) => !value)}>
-            <View style={styles.apiCopy}>
-              <Text style={[styles.apiSmall, { color: themeColors.muted }]}>Connection status</Text>
-              <Text style={[styles.apiTitle, { color: themeColors.ink }]}>On-device care guide</Text>
-            </View>
-            <Text style={[styles.apiToggleText, { color: themeColors.primaryDark }]}>{apiOpen ? 'Hide' : 'Details'}</Text>
-          </Pressable>
-          {apiOpen ? (
-            <View style={[styles.apiDetails, { borderTopColor: themeColors.line }]}>
-              <Text style={[styles.apiText, { color: themeColors.muted }]}> 
-                Messages on this screen stay in the app and are not sent to the clinic website. Client records,
-                appointments, alerts, and products use the live Vetrix API separately.
-              </Text>
-              <Text style={[styles.apiWarning, { backgroundColor: themeColors.primarySoft, color: themeColors.primaryDark }]}>For clinical advice, diagnosis, or urgent symptoms, contact the clinic directly.</Text>
-            </View>
-          ) : null}
-        </AppCard>
-      </ScrollView>
+          <View style={[styles.chatBox, { backgroundColor: themeColors.surface, borderColor: themeColors.line }]}>
+            {messages.map((message) => (
+              <View
+                key={message.id}
+                style={[
+                  styles.bubble,
+                  message.type === 'user'
+                    ? [styles.userBubble, { backgroundColor: themeColors.primary }]
+                    : [styles.botBubble, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.line }],
+                ]}>
+                {message.type === 'bot' ? <Text style={[styles.botName, { color: themeColors.primaryDark }]}>Vetrix guide</Text> : null}
+                {message.triage ? <Text style={[styles.triage, triageStyle(message.triage, themeColors)]}>Triage: {message.triage}</Text> : null}
+                <Text style={[styles.bubbleText, { color: themeColors.ink }, message.type === 'user' && { color: primaryActionText }]}>{message.text}</Text>
+                {message.questions?.length ? (
+                  <View style={[styles.questionBlock, { borderTopColor: themeColors.line }]}>
+                    <Text style={[styles.questionTitle, { color: themeColors.ink }]}>Follow-up questions</Text>
+                    {message.questions.map((question) => (
+                      <Text key={question} style={[styles.questionText, { color: themeColors.muted }]}>- {question}</Text>
+                    ))}
+                  </View>
+                ) : null}
+                {message.safetyNote ? <Text style={styles.safetyNote}>{message.safetyNote}</Text> : null}
+              </View>
+            ))}
+            {typing ? (
+              <View style={[styles.bubble, styles.botBubble, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.line }]}>
+                <Text style={[styles.botName, { color: themeColors.primaryDark }]}>Vetrix guide</Text>
+                <Text style={[styles.bubbleText, { color: themeColors.ink }]}>Preparing clear guidance...</Text>
+              </View>
+            ) : null}
+          </View>
+
+          <View style={styles.chips}>
+            {quickQuestions.map((item) => (
+              <Pressable
+                key={item.label}
+                style={[styles.chip, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.lineStrong }]}
+                onPress={() => sendMessage(item.message)}>
+                <Text style={[styles.chipText, { color: themeColors.primaryDark }]}>{item.label}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <View style={[styles.inputRow, { backgroundColor: themeColors.surface, borderColor: themeColors.line }]}>
+            <TextInput
+              value={input}
+              onChangeText={setInput}
+              placeholder="Describe your pet concern"
+              placeholderTextColor={themeColors.muted}
+              style={[styles.input, { color: themeColors.ink }]}
+              multiline
+            />
+            <Pressable accessibilityLabel="Send message" style={[styles.sendButton, { backgroundColor: themeColors.primary }]} onPress={() => sendMessage(input)}>
+              <AppIcon name="send" color={primaryActionText} size={18} />
+            </Pressable>
+          </View>
+
+          <Text style={[styles.footerNote, { color: themeColors.muted }]}>
+            This assistant gives general guidance only. Severe, fast-changing, or persistent symptoms need a veterinarian.
+          </Text>
+
+          <AppCard elevated={false} style={[styles.apiCard, { backgroundColor: themeColors.surface, borderColor: themeColors.line }]}>
+            <Pressable style={styles.apiToggle} onPress={() => setApiOpen((value) => !value)}>
+              <View style={styles.apiCopy}>
+                <Text style={[styles.apiSmall, { color: themeColors.muted }]}>Connection status</Text>
+                <Text style={[styles.apiTitle, { color: themeColors.ink }]}>On-device care guide</Text>
+              </View>
+              <Text style={[styles.apiToggleText, { color: themeColors.primaryDark }]}>{apiOpen ? 'Hide' : 'Details'}</Text>
+            </Pressable>
+            {apiOpen ? (
+              <View style={[styles.apiDetails, { borderTopColor: themeColors.line }]}>
+                <Text style={[styles.apiText, { color: themeColors.muted }]}> 
+                  Messages on this screen stay in the app and are not sent to the clinic website. Client records,
+                  appointments, alerts, and products use the live Vetrix API separately.
+                </Text>
+                <Text style={[styles.apiWarning, { backgroundColor: themeColors.primarySoft, color: themeColors.primaryDark }]}>For clinical advice, diagnosis, or urgent symptoms, contact the clinic directly.</Text>
+              </View>
+            ) : null}
+          </AppCard>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -165,183 +165,186 @@ export default function PetsScreen({ navigation }) {
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safeArea, { backgroundColor: themeColors.background }]}>
       <NotificationPanel visible={panelOpen} onClose={() => setPanelOpen(false)} />
-      <FlatList
-        data={loading ? [] : filteredPets}
-        keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={styles.container}
-        refreshControl={refreshControl}
-        ListHeaderComponent={
-          <>
-            <HeaderBar onOpenNotifications={() => setPanelOpen(true)} />
-            <View style={styles.hero}>
-              <View style={styles.titleCopy}>
-                <Text style={[styles.heroTitle, { color: themeColors.ink }]}>My Pets</Text>
-                <Text style={[styles.heroText, { color: themeColors.muted }]}>View clinic pet profiles and care details.</Text>
-              </View>
-              <Pressable
-                accessibilityLabel={formOpen ? 'Close pet registration form' : 'Add a pet'}
-                accessibilityRole="button"
-                disabled={submitting}
-                style={[styles.addButton, { backgroundColor: themeColors.primary }, submitting && styles.disabledButton]}
-                onPress={() => {
-                  if (formOpen) {
-                    setFormOpen(false);
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} enabled={Platform.OS !== 'web'}>
+        <FlatList
+          keyboardShouldPersistTaps="handled"
+          data={loading ? [] : filteredPets}
+          keyExtractor={(item) => String(item.id)}
+          contentContainerStyle={styles.container}
+          refreshControl={refreshControl}
+          ListHeaderComponent={
+            <>
+              <HeaderBar onOpenNotifications={() => setPanelOpen(true)} />
+              <View style={styles.hero}>
+                <View style={styles.titleCopy}>
+                  <Text style={[styles.heroTitle, { color: themeColors.ink }]}>My Pets</Text>
+                  <Text style={[styles.heroText, { color: themeColors.muted }]}>View clinic pet profiles and care details.</Text>
+                </View>
+                <Pressable
+                  accessibilityLabel={formOpen ? 'Close pet registration form' : 'Add a pet'}
+                  accessibilityRole="button"
+                  disabled={submitting}
+                  style={[styles.addButton, { backgroundColor: themeColors.primary }, submitting && styles.disabledButton]}
+                  onPress={() => {
+                    if (formOpen) {
+                      setFormOpen(false);
+                      setError('');
+                      return;
+                    }
+                    setForm({ ...emptyPetForm });
                     setError('');
-                    return;
-                  }
-                  setForm({ ...emptyPetForm });
-                  setError('');
-                  setEditPet(null);
-                  setEditForm({ ...emptyPetForm });
-                  setEditError('');
-                  setFormOpen(true);
-                }}>
-                <AppIcon name={formOpen ? 'close' : 'plus'} color="#FFFFFF" size={15} />
-                <Text style={styles.addButtonText}>{formOpen ? 'Close' : 'Add Pet'}</Text>
-              </Pressable>
-            </View>
-
-            {formOpen ? (
-              <PetFormCard
-                form={form}
-                error={error}
-                mode="add"
-                submitting={submitting}
-                onCancel={() => {
-                  setFormOpen(false);
-                  setForm({ ...emptyPetForm });
-                  setError('');
-                }}
-                onSubmit={handleSubmit}
-                onUpdate={updateForm}
-              />
-            ) : null}
-
-            {editPet ? (
-              <PetFormCard
-                form={editForm}
-                error={editError}
-                mode="edit"
-                petName={editPet.name}
-                submitting={submitting}
-                onCancel={() => {
-                  setEditPet(null);
-                  setEditForm({ ...emptyPetForm });
-                  setEditError('');
-                }}
-                onSubmit={submitEditRequest}
-                onUpdate={updateEditForm}
-              />
-            ) : null}
-
-            <View style={styles.filterSection}>
-              <View style={styles.filterHeader}>
-                <Text style={[styles.filterTitle, { color: themeColors.ink }]}>Pet status</Text>
-                <Text style={[styles.filterSummary, { color: themeColors.muted }]}>
-                  {filteredPets.length} {filteredPets.length === 1 ? 'pet' : 'pets'} shown
-                </Text>
+                    setEditPet(null);
+                    setEditForm({ ...emptyPetForm });
+                    setEditError('');
+                    setFormOpen(true);
+                  }}>
+                  <AppIcon name={formOpen ? 'close' : 'plus'} color="#FFFFFF" size={15} />
+                  <Text style={styles.addButtonText}>{formOpen ? 'Close' : 'Add Pet'}</Text>
+                </Pressable>
               </View>
 
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} accessibilityLabel="Filter pets by status" contentContainerStyle={styles.filterRow}>
-                {filterOptions.map((filter) => {
-                  const active = activeFilter === filter;
-                  const count = counts[filter] ?? 0;
-                  const tone = getFilterTone(filter, themeColors, isNightMode);
+              {formOpen ? (
+                <PetFormCard
+                  form={form}
+                  error={error}
+                  mode="add"
+                  submitting={submitting}
+                  onCancel={() => {
+                    setFormOpen(false);
+                    setForm({ ...emptyPetForm });
+                    setError('');
+                  }}
+                  onSubmit={handleSubmit}
+                  onUpdate={updateForm}
+                />
+              ) : null}
 
-                  return (
-                    <Pressable
-                      key={filter}
-                      accessibilityLabel={`${getPetStatusLabel(filter)}, ${count} ${count === 1 ? 'pet' : 'pets'}`}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: active }}
-                      style={({ pressed }) => [
-                        styles.filterChip,
-                        { backgroundColor: themeColors.surface, borderColor: themeColors.line },
-                        active && { backgroundColor: tone.background, borderColor: tone.accent },
-                        pressed && styles.filterChipPressed,
-                      ]}
-                      onPress={() => setActiveFilter(filter)}>
-                      <View style={[styles.filterDot, { backgroundColor: tone.accent }]} />
-                      <Text
-                        numberOfLines={1}
-                        style={[styles.filterText, { color: themeColors.inkSoft }, active && { color: tone.text }]}>
-                        {getPetStatusLabel(filter)}
-                      </Text>
-                      <View
-                        style={[
-                          styles.filterCount,
-                          {
-                            backgroundColor: active ? themeColors.surface : themeColors.surfaceAlt,
-                            borderColor: active ? tone.accent : themeColors.line,
-                          },
-                        ]}>
-                        <Text style={[styles.filterCountText, { color: active ? tone.text : themeColors.muted }]}>
-                          {count}
+              {editPet ? (
+                <PetFormCard
+                  form={editForm}
+                  error={editError}
+                  mode="edit"
+                  petName={editPet.name}
+                  submitting={submitting}
+                  onCancel={() => {
+                    setEditPet(null);
+                    setEditForm({ ...emptyPetForm });
+                    setEditError('');
+                  }}
+                  onSubmit={submitEditRequest}
+                  onUpdate={updateEditForm}
+                />
+              ) : null}
+
+              <View style={styles.filterSection}>
+                <View style={styles.filterHeader}>
+                  <Text style={[styles.filterTitle, { color: themeColors.ink }]}>Pet status</Text>
+                  <Text style={[styles.filterSummary, { color: themeColors.muted }]}>
+                    {filteredPets.length} {filteredPets.length === 1 ? 'pet' : 'pets'} shown
+                  </Text>
+                </View>
+
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} accessibilityLabel="Filter pets by status" contentContainerStyle={styles.filterRow}>
+                  {filterOptions.map((filter) => {
+                    const active = activeFilter === filter;
+                    const count = counts[filter] ?? 0;
+                    const tone = getFilterTone(filter, themeColors, isNightMode);
+
+                    return (
+                      <Pressable
+                        key={filter}
+                        accessibilityLabel={`${getPetStatusLabel(filter)}, ${count} ${count === 1 ? 'pet' : 'pets'}`}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: active }}
+                        style={({ pressed }) => [
+                          styles.filterChip,
+                          { backgroundColor: themeColors.surface, borderColor: themeColors.line },
+                          active && { backgroundColor: tone.background, borderColor: tone.accent },
+                          pressed && styles.filterChipPressed,
+                        ]}
+                        onPress={() => setActiveFilter(filter)}>
+                        <View style={[styles.filterDot, { backgroundColor: tone.accent }]} />
+                        <Text
+                          numberOfLines={1}
+                          style={[styles.filterText, { color: themeColors.inkSoft }, active && { color: tone.text }]}>
+                          {getPetStatusLabel(filter)}
                         </Text>
+                        <View
+                          style={[
+                            styles.filterCount,
+                            {
+                              backgroundColor: active ? themeColors.surface : themeColors.surfaceAlt,
+                              borderColor: active ? tone.accent : themeColors.line,
+                            },
+                          ]}>
+                          <Text style={[styles.filterCountText, { color: active ? tone.text : themeColors.muted }]}>
+                            {count}
+                          </Text>
+                        </View>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+
+              {editRequests.length ? (
+                <AppCard style={styles.requestsCard}>
+                  <Pressable accessibilityRole="button" accessibilityLabel="Pet Edit Requests" accessibilityState={{ expanded: requestsOpen }} aria-expanded={requestsOpen} onPress={() => setRequestsOpen((open) => !open)} style={styles.requestsToggle}>
+                    <View style={styles.requestCopy}>
+                      <Text style={[styles.requestsTitle, { color: themeColors.ink }]}>Pet Edit Requests ({editRequests.length})</Text>
+                      <Text style={[styles.requestFields, { color: themeColors.muted }]}>{requestsOpen ? 'Hide submitted changes' : 'Track clinic review'}</Text>
+                    </View>
+                    <AppIcon name={requestsOpen ? 'up' : 'down'} size={20} color={themeColors.primaryDark} />
+                  </Pressable>
+                  {requestsOpen && editRequests.map((request) => (
+                    <Pressable
+                      key={request.id}
+                      accessibilityRole="button"
+                      accessibilityLabel={`View ${String(request.status || 'pending').toLowerCase()} changes for ${request.petName}`}
+                      accessibilityHint="Opens the submitted pet information for review"
+                      onPress={() => navigation.navigate('PetEditRequestDetails', { request })}
+                      style={({ pressed }) => [
+                        styles.requestItem,
+                        { borderTopColor: themeColors.line },
+                        pressed && styles.requestItemPressed,
+                      ]}>
+                      <View style={styles.requestCopy}>
+                        <Text style={[styles.requestPet, { color: themeColors.ink }]}>{request.petName}</Text>
+                        <Text style={[styles.requestFields, { color: themeColors.muted }]}>{request.changes.map((change) => change.label).join(', ')}</Text>
+                      </View>
+                      <View style={styles.requestAction}>
+                        <StatusBadge status={request.status} label={getPetStatusLabel(request.status)} />
+                        <AppIcon name="forward" color={themeColors.muted} size={17} />
                       </View>
                     </Pressable>
-                  );
-                })}
-              </ScrollView>
-            </View>
-
-            {editRequests.length ? (
-              <AppCard style={styles.requestsCard}>
-                <Pressable accessibilityRole="button" accessibilityLabel="Pet Edit Requests" accessibilityState={{ expanded: requestsOpen }} aria-expanded={requestsOpen} onPress={() => setRequestsOpen((open) => !open)} style={styles.requestsToggle}>
-                  <View style={styles.requestCopy}>
-                    <Text style={[styles.requestsTitle, { color: themeColors.ink }]}>Pet Edit Requests ({editRequests.length})</Text>
-                    <Text style={[styles.requestFields, { color: themeColors.muted }]}>{requestsOpen ? 'Hide submitted changes' : 'Track clinic review'}</Text>
-                  </View>
-                  <AppIcon name={requestsOpen ? 'up' : 'down'} size={20} color={themeColors.primaryDark} />
-                </Pressable>
-                {requestsOpen && editRequests.map((request) => (
-                  <Pressable
-                    key={request.id}
-                    accessibilityRole="button"
-                    accessibilityLabel={`View ${String(request.status || 'pending').toLowerCase()} changes for ${request.petName}`}
-                    accessibilityHint="Opens the submitted pet information for review"
-                    onPress={() => navigation.navigate('PetEditRequestDetails', { request })}
-                    style={({ pressed }) => [
-                      styles.requestItem,
-                      { borderTopColor: themeColors.line },
-                      pressed && styles.requestItemPressed,
-                    ]}>
-                    <View style={styles.requestCopy}>
-                      <Text style={[styles.requestPet, { color: themeColors.ink }]}>{request.petName}</Text>
-                      <Text style={[styles.requestFields, { color: themeColors.muted }]}>{request.changes.map((change) => change.label).join(', ')}</Text>
-                    </View>
-                    <View style={styles.requestAction}>
-                      <StatusBadge status={request.status} label={getPetStatusLabel(request.status)} />
-                      <AppIcon name="forward" color={themeColors.muted} size={17} />
-                    </View>
-                  </Pressable>
-                ))}
-              </AppCard>
-            ) : null}
-          </>
-        }
-        ListEmptyComponent={
-          loading ? (
-            <View>
-              <PetCardSkeleton />
-              <PetCardSkeleton />
-            </View>
-          ) : (
-            <EmptyState
-              title={activeFilter === 'All' ? 'No pets registered yet' : `No ${activeFilter.toLowerCase()} pets`}
-              message={activeFilter === 'All' ? 'Tap Add Pet to submit a profile for admin verification.' : 'Try selecting another pet status.'}
-              icon="pets"
+                  ))}
+                </AppCard>
+              ) : null}
+            </>
+          }
+          ListEmptyComponent={
+            loading ? (
+              <View>
+                <PetCardSkeleton />
+                <PetCardSkeleton />
+              </View>
+            ) : (
+              <EmptyState
+                title={activeFilter === 'All' ? 'No pets registered yet' : `No ${activeFilter.toLowerCase()} pets`}
+                message={activeFilter === 'All' ? 'Tap Add Pet to submit a profile for admin verification.' : 'Try selecting another pet status.'}
+                icon="pets"
+              />
+            )
+          }
+          renderItem={({ item }) => (
+            <PetCard
+              pet={item}
+              onPress={() => navigation.navigate('PetDetails', { petId: item.id, pet: item })}
+              onRequestEdit={() => startEditRequest(item)}
             />
-          )
-        }
-        renderItem={({ item }) => (
-          <PetCard
-            pet={item}
-            onPress={() => navigation.navigate('PetDetails', { petId: item.id, pet: item })}
-            onRequestEdit={() => startEditRequest(item)}
-          />
-        )}
-      />
+          )}
+        />
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -419,11 +422,13 @@ function PetFormCard({ error, form, mode, onCancel, onSubmit, onUpdate, petName,
           <PetFormSection first title="Pet basics" detail="Identity details used across visits and records.">
             <FormInput label="Pet name" value={form.name} onChangeText={(value) => update('name', value)} placeholder="Enter pet name" error={fieldErrors.name} />
 
-            <ChoiceField label="Pet type" options={speciesOptions} value={form.species} onChange={(value) => update('species', value)} error={fieldErrors.species} selectedChipStyle={selectedChipStyle} selectedChipTextStyle={selectedChipTextStyle} />
-            <ChoiceField label="Sex" options={sexOptions} value={form.sex} onChange={(value) => update('sex', value)} error={fieldErrors.sex} selectedChipStyle={selectedChipStyle} selectedChipTextStyle={selectedChipTextStyle} />
+            {!isEdit ? <>
+              <ChoiceField label="Pet type" options={speciesOptions} value={form.species} onChange={(value) => update('species', value)} error={fieldErrors.species} selectedChipStyle={selectedChipStyle} selectedChipTextStyle={selectedChipTextStyle} />
+              <ChoiceField label="Sex" options={sexOptions} value={form.sex} onChange={(value) => update('sex', value)} error={fieldErrors.sex} selectedChipStyle={selectedChipStyle} selectedChipTextStyle={selectedChipTextStyle} />
 
-            <FormInput label="Breed" value={form.breed} onChangeText={(value) => update('breed', value)} placeholder="Breed or mixed breed" error={fieldErrors.breed} />
-            <DateTimeField label="Birthdate" value={form.birthDate} onChange={(value) => update('birthDate', value)} maximumDate={new Date()} error={fieldErrors.birthDate} />
+              <FormInput label="Breed" value={form.breed} onChangeText={(value) => update('breed', value)} placeholder="Breed or mixed breed" error={fieldErrors.breed} />
+              <DateTimeField label="Birthdate" value={form.birthDate} onChange={(value) => update('birthDate', value)} maximumDate={new Date()} error={fieldErrors.birthDate} />
+            </> : null}
             <NumberStepper label="Weight" value={form.weight} onChange={(value) => update('weight', value)} max={120} error={fieldErrors.weight} />
             <FormInput label="Color / markings" value={form.color} onChangeText={(value) => update('color', value)} placeholder="Brown with white spots" error={fieldErrors.color} />
           </PetFormSection>
@@ -455,9 +460,11 @@ function PetFormCard({ error, form, mode, onCancel, onSubmit, onUpdate, petName,
             {fieldErrors.photo ? <Text style={[styles.fieldError, { color: themeColors.danger }]}>{fieldErrors.photo}</Text> : null}
 
             <View style={[styles.reviewBox, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.line }]}> 
-              <ReviewRow label="Pet" value={`${form.name || 'Not entered'}${form.breed ? `, ${form.breed}` : ''}`} />
+              <ReviewRow label="Pet" value={`${form.name || 'Not entered'}${!isEdit && form.breed ? `, ${form.breed}` : ''}`} />
+              {isEdit ? <ReviewRow label="Weight" value={form.weight ? `${form.weight} kg` : 'Not entered'} /> : <>
               <ReviewRow label="Profile" value={[form.species, form.sex, form.weight ? `${form.weight} kg` : ''].filter(Boolean).join(' · ') || 'Not complete'} />
               <ReviewRow label="Birthdate" value={form.birthDate || 'Not selected'} />
+              </>}
               <ReviewRow label="Health" value={form.allergies ? `Allergies: ${form.allergies}` : 'Not complete'} last />
             </View>
           </PetFormSection>
@@ -567,10 +574,6 @@ function buildPetEditForm(pet) {
 function getPetEditChanges(pet, form) {
   const fields = [
     ['name', pet.name, form.name],
-    ['species', pet.species, form.species],
-    ['breed', pet.breed, form.breed],
-    ['sex', pet.gender || pet.sex, form.sex],
-    ['birthDate', pet.birthDate, form.birthDate],
     ['weight', pet.weight, form.weight],
     ['color', pet.color, form.color],
     ['allergies', pet.allergies, form.allergies],
@@ -623,15 +626,17 @@ function validatePetStep(form, step, isEdit) {
 
   if (step === 0) {
     required('name', 'Enter your pet\'s name.');
-    required('species', 'Choose a pet type.');
-    required('sex', 'Choose a sex.');
-    required('breed', 'Enter a breed or mixed breed.');
-    required('birthDate', 'Choose a birthdate.');
+    if (!isEdit) {
+      required('species', 'Choose a pet type.');
+      required('sex', 'Choose a sex.');
+      required('breed', 'Enter a breed or mixed breed.');
+      required('birthDate', 'Choose a birthdate.');
+    }
     required('weight', 'Enter a valid weight.');
     required('color', 'Describe the color or markings.');
 
-    if (form.birthDate && Number.isNaN(new Date(`${form.birthDate}T12:00:00`).getTime())) errors.birthDate = 'Choose a valid birthdate.';
-    if (form.birthDate && new Date(`${form.birthDate}T12:00:00`) > new Date()) errors.birthDate = 'Birthdate cannot be in the future.';
+    if (!isEdit && form.birthDate && Number.isNaN(new Date(`${form.birthDate}T12:00:00`).getTime())) errors.birthDate = 'Choose a valid birthdate.';
+    if (!isEdit && form.birthDate && new Date(`${form.birthDate}T12:00:00`) > new Date()) errors.birthDate = 'Birthdate cannot be in the future.';
     if (form.weight && (Number(form.weight) <= 0 || Number(form.weight) > 120)) errors.weight = 'Use a weight between 0.1 and 120 kg.';
   }
 
@@ -670,7 +675,7 @@ const styles = StyleSheet.create({
   },
   addButtonText: { color: '#FFFFFF', fontSize: 13, fontFamily: 'Manrope_800ExtraBold' },
   disabledButton: { opacity: 0.55 },
-  formCard: { marginBottom: spacing.md, backgroundColor: colors.surface },
+  formCard: { marginBottom: spacing.md },
   formTitle: { color: colors.ink, fontSize: 17, fontFamily: 'Manrope_800ExtraBold' },
   formHelp: { color: colors.muted, fontSize: 14, lineHeight: 19, fontFamily: 'Manrope_500Medium', marginTop: spacing.xs, marginBottom: spacing.sm },
   progressRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.sm, paddingVertical: spacing.sm },

@@ -179,7 +179,7 @@ export default function AppointmentsScreen({ navigation, route }) {
     <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safeArea, { backgroundColor: themeColors.background }]}>
       <NotificationPanel visible={panelOpen} onClose={() => setPanelOpen(false)} />
       {ratingAppointment ? <VisitRatingModal key={ratingAppointment.id} appointment={ratingAppointment} onClose={() => setRatingAppointment(null)} /> : null}
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboard}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} enabled={Platform.OS !== 'web'} style={styles.keyboard}>
       <FlatList
         ref={listRef}
         style={styles.list}

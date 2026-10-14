@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { createProductOrder } from '../api/clientApi';
 import AppButton from '../components/AppButton';
@@ -81,7 +81,7 @@ export default function ProductCheckoutScreen({ navigation }) {
     } finally { submitting.current = false; setBusy(false); }
   }
 
-  return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+  return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} enabled={Platform.OS !== 'web'}><ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
     <StackHeader navigation={navigation} title="Your cart" />
     <AppButton title="My orders" variant="outline" onPress={() => navigation.navigate('ProductOrders')} />
     {!lines.length ? <EmptyState title="Your cart is empty" message="Add products from the clinic shop to get started." icon="store" /> : <>
@@ -104,6 +104,6 @@ export default function ProductCheckoutScreen({ navigation }) {
       {error ? <Text accessibilityRole="alert" style={[styles.copy, { color: colors.danger }]}>{error}</Text> : null}
       <AppButton title={uncertain ? 'Retry order confirmation' : `Place order · ${money(total)}`} onPress={placeOrder} loading={busy} disabled={!uncertain && (invalid || paymentUnavailable || paymentLoading || !!paymentError)} />
     </>}
-  </ScrollView></SafeAreaView>;
+  </ScrollView></KeyboardAvoidingView></SafeAreaView>;
 }
 const styles = StyleSheet.create({ container: { padding: spacing.screen, paddingTop: 0, paddingBottom: 40, gap: 12 }, title: { fontFamily: 'Manrope_800ExtraBold', fontSize: 20, marginTop: 12 }, name: { fontFamily: 'Manrope_800ExtraBold', fontSize: 14 }, copy: { fontFamily: 'Manrope_500Medium', fontSize: 13, lineHeight: 20 }, card: { gap: 10 }, option: { borderWidth: 1, borderRadius: 12, padding: 16, gap: 6 } });

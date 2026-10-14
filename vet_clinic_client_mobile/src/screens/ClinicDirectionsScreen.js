@@ -72,7 +72,7 @@ export default function ClinicDirectionsScreen({ navigation }) {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}> 
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} enabled={Platform.OS !== 'web'} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <StackHeader navigation={navigation} title="Clinic directions" />
 

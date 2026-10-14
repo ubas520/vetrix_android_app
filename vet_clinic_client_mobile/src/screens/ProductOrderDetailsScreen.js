@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
-import { Linking, Image, RefreshControl, ScrollView, StyleSheet, Text } from 'react-native';
+import { KeyboardAvoidingView, Platform, Linking, Image, RefreshControl, ScrollView, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { buildWebsiteUrl } from '../api/config';
 import { cancelProductOrder, submitOrderProof } from '../api/clientApi';
@@ -54,7 +54,7 @@ export default function ProductOrderDetailsScreen({ navigation, route }) {
   const recipient = order?.payment_recipient;
   const provider = recipient?.provider || (order?.payment_method === 'bank' ? 'Bank transfer' : 'GCash');
   const validReference = (order?.payment_method === 'bank' ? /^[A-Za-z0-9]{6,40}$/ : /^\d{10,20}$/).test(reference.replace(/[\s-]/g, ''));
-  return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={false} onRefresh={load} />}>
+  return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} enabled={Platform.OS !== 'web'}><ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={false} onRefresh={load} />}>
     <StackHeader navigation={navigation} title={order ? `Order #${order.id}` : 'Order details'} />
     {error ? <Text accessibilityRole="alert" style={[styles.copy, { color: colors.danger }]}>{error}</Text> : null}
     {notice ? <Text accessibilityLiveRegion="polite" style={[styles.copy, { color: colors.primaryDark }]}>{notice}</Text> : null}
@@ -84,6 +84,6 @@ export default function ProductOrderDetailsScreen({ navigation, route }) {
       {open && ['pending', 'rejected'].includes(order.payment_status) ? <AppButton title="Cancel order" variant="danger" disabled={busy} onPress={() => showAppAlert('Cancel order?', 'This releases your reserved products. If you already sent payment, contact staff before cancelling.', [{ text: 'Keep order', style: 'cancel' }, { text: 'Cancel order', style: 'destructive', onPress: () => mutate('cancel') }])} /> : null}
     </> : <Text style={[styles.copy, { color: colors.muted }]}>Loading order details. Pull down to retry.</Text>}
     <AppButton title="All my orders" variant="outline" onPress={() => navigation.navigate('ProductOrders')} />
-  </ScrollView></SafeAreaView>;
+  </ScrollView></KeyboardAvoidingView></SafeAreaView>;
 }
 const styles = StyleSheet.create({ container: { paddingHorizontal: spacing.screen, paddingBottom: 40, gap: 12 }, card: { gap: 12 }, title: { fontSize: 19, fontFamily: 'Manrope_800ExtraBold' }, name: { fontSize: 15, lineHeight: 23, fontFamily: 'Manrope_800ExtraBold' }, copy: { fontSize: 13, lineHeight: 21, fontFamily: 'Manrope_500Medium' } });

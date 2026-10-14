@@ -1,5 +1,25 @@
 # Android APK
 
+## Current Expo project
+
+The app is linked to `justinegrape/vetrixmobileapp` (project ID
+`23f4671e-4f3c-4e10-a594-5ce72fb74817`). Its Expo Updates URL uses this same ID.
+The previous project ID no longer resolves. Build and update links below for
+`vet-clinic-client-mobile` describe the previous project, not the current one.
+The October 3, 2026 APK build completed successfully:
+https://expo.dev/accounts/justinegrape/projects/vetrixmobileapp/builds/cfd23792-a04b-44fd-8239-389b83d91e1a
+
+APK download:
+https://expo.dev/artifacts/eas/3UK_A7X56wc1rxF_n7BS9Z6GfrwhMfv3UJAVh31mOJU.apk
+
+EAS generated a signing key for the current project on October 3, 2026.
+An APK signed with this key may require uninstalling an older installation if
+that installation used a different signing key.
+
+The APK profile supplies the deployed API URLs. The current project's EAS
+production environment has no variables yet; configure both public URL variables
+there before publishing an OTA update.
+
 This native app connects to the website through its PHP mobile API.
 
 Before building, verify that the deployed website includes `api/mobile/v1`
@@ -9,8 +29,8 @@ and its required database migrations and shared PHP services. See
 The `apk` profile in `eas.json` and local `.env.local` are configured with:
 
 ```dotenv
-EXPO_PUBLIC_VETRIX_API_URL=https://vetrixwebapp-production.up.railway.app/api/mobile/v1
-EXPO_PUBLIC_VETRIX_WEBSITE_URL=https://vetrixwebapp-production.up.railway.app
+EXPO_PUBLIC_VETRIX_API_URL=https://privvetrix.up.railway.app/api/mobile/v1
+EXPO_PUBLIC_VETRIX_WEBSITE_URL=https://privvetrix.up.railway.app
 ```
 
 Update both configurations if the website address changes. Never put server

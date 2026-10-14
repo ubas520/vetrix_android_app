@@ -77,7 +77,7 @@ export default function ProfileScreen({ navigation }) {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColors.background }]}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboard}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} enabled={Platform.OS !== 'web'} style={styles.keyboard}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
           <StackHeader navigation={navigation} title="Profile" />
 

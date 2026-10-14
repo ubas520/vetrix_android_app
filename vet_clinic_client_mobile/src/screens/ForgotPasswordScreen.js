@@ -77,7 +77,7 @@ export default function ForgotPasswordScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={[styles.fill, { backgroundColor: colors.background }]}>
-      <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} enabled={Platform.OS !== 'web'}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
           <Pressable accessibilityRole="button" disabled={busy} onPress={() => navigation.goBack()} style={styles.link}>
             <Text style={[styles.linkText, { color: colors.primary }]}>Back to login</Text>

@@ -75,10 +75,6 @@ export function createPetEditRequest(values = {}) {
     body: {
       pet_id: values.petId ?? values.pet_id,
       name: values.name,
-      species: values.species,
-      breed: values.breed,
-      sex: values.sex,
-      birth_date: values.birthDate ?? values.birth_date,
       weight: values.weight,
       color: values.color,
       allergies: values.allergies,

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import AppCard from '../components/AppCard';
@@ -74,101 +74,103 @@ export default function ProductCatalogScreen({ navigation }) {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}> 
-      <ScrollView
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-        refreshControl={refreshControl}
-        showsVerticalScrollIndicator={false}>
-        <StackHeader navigation={navigation} title="Clinic products" />
-
-        <AppCard tone="blue" style={styles.hero}>
-          <View style={[styles.heroIcon, { backgroundColor: colors.surface }]}>
-            <AppIcon name="store" color={colors.primaryDark} size={26} />
-          </View>
-          <View style={styles.heroCopy}>
-            <Text style={[styles.heroKicker, { color: colors.primaryDark }]}>Clinic shop</Text>
-            <Text style={[styles.heroTitle, { color: colors.ink }]}>Products for your pet</Text>
-            <Text style={[styles.heroText, { color: colors.muted }]}>Shop clinic products and collect your order at Vetrix.</Text>
-          </View>
-        </AppCard>
-
-        <View style={[styles.purchaseNote, { backgroundColor: colors.accentSoft, borderColor: colors.accent }]}>
-          <View style={[styles.purchaseIcon, { backgroundColor: colors.surface }]}>
-            <AppIcon name="petCheck" color={colors.success} size={17} />
-          </View>
-          <Text style={[styles.purchaseText, { color: colors.inkSoft }]}>Choose GCash or bank transfer with staff verification, or pay at the clinic on pickup.</Text>
-        </View>
-        <View style={{ gap: 8, marginBottom: spacing.md }}>
-          <AppButton title={`View cart (${cartCount})`} onPress={() => navigation.navigate('ProductCheckout')} variant={cartCount ? 'primary' : 'outline'} />
-          <AppButton title="My orders" onPress={() => navigation.navigate('ProductOrders')} variant="outline" />
-        </View>
-
-        <FormInput
-          accessibilityLabel="Search products"
-          autoCapitalize="none"
-          autoCorrect={false}
-          icon="search"
-          onChangeText={setQuery}
-          placeholder="Search product or category"
-          returnKeyType="search"
-          value={query}
-        />
-
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} enabled={Platform.OS !== 'web'}>
         <ScrollView
-          contentContainerStyle={styles.categories}
-          horizontal
+          contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
-          showsHorizontalScrollIndicator={false}
-          style={styles.categoryScroll}>
-          {categories.map((item) => {
-            const selected = item === category;
-            return (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
-                key={item}
-                onPress={() => setCategory(item)}
-                style={({ pressed }) => [
-                  styles.category,
-                  { backgroundColor: selected ? colors.primary : colors.surface, borderColor: selected ? colors.primary : colors.line },
-                  pressed && styles.pressed,
-                ]}>
-                <Text style={[styles.categoryText, { color: selected ? '#FFFFFF' : colors.inkSoft }]}>{item}</Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+          refreshControl={refreshControl}
+          showsVerticalScrollIndicator={false}>
+          <StackHeader navigation={navigation} title="Clinic products" />
 
-        <View style={styles.resultsHead}>
-          <View>
-            <Text style={[styles.sectionTitle, { color: colors.ink }]}>Available at Vetrix</Text>
-            <Text accessibilityLiveRegion="polite" style={[styles.resultCount, { color: colors.muted }]}>{loading ? 'Loading products…' : resultLabel}</Text>
-          </View>
-          <View style={[styles.readOnlyBadge, { backgroundColor: colors.surfaceAlt, borderColor: colors.line }]}>
-            <AppIcon name="store" color={colors.muted} size={13} />
-            <Text style={[styles.readOnlyText, { color: colors.muted }]}>Clinic pickup</Text>
-          </View>
-        </View>
+          <AppCard tone="blue" style={styles.hero}>
+            <View style={[styles.heroIcon, { backgroundColor: colors.surface }]}>
+              <AppIcon name="store" color={colors.primaryDark} size={26} />
+            </View>
+            <View style={styles.heroCopy}>
+              <Text style={[styles.heroKicker, { color: colors.primaryDark }]}>Clinic shop</Text>
+              <Text style={[styles.heroTitle, { color: colors.ink }]}>Products for your pet</Text>
+              <Text style={[styles.heroText, { color: colors.muted }]}>Shop clinic products and collect your order at Vetrix.</Text>
+            </View>
+          </AppCard>
 
-        {loading ? (
-          <View>
-            <ProductCardSkeleton />
-            <ProductCardSkeleton />
-            <ProductCardSkeleton />
+          <View style={[styles.purchaseNote, { backgroundColor: colors.accentSoft, borderColor: colors.accent }]}>
+            <View style={[styles.purchaseIcon, { backgroundColor: colors.surface }]}>
+              <AppIcon name="petCheck" color={colors.success} size={17} />
+            </View>
+            <Text style={[styles.purchaseText, { color: colors.inkSoft }]}>Choose GCash or bank transfer with staff verification, or pay at the clinic on pickup.</Text>
           </View>
-        ) : visibleProducts.length ? (
-          visibleProducts.map((product, index) => <ProductCard delay={index * 45} key={product.id} product={product} quantity={cart[product.id] || 0} onChange={(quantity) => updateCart(product.id, quantity)} />)
-        ) : (
-          <EmptyState
-            icon="product"
-            message={query.trim() ? `No products match “${query.trim()}”. Try another name or category.` : 'No client-visible products are listed in this category.'}
-            title="No products found"
+          <View style={{ gap: 8, marginBottom: spacing.md }}>
+            <AppButton title={`View cart (${cartCount})`} onPress={() => navigation.navigate('ProductCheckout')} variant={cartCount ? 'primary' : 'outline'} />
+            <AppButton title="My orders" onPress={() => navigation.navigate('ProductOrders')} variant="outline" />
+          </View>
+
+          <FormInput
+            accessibilityLabel="Search products"
+            autoCapitalize="none"
+            autoCorrect={false}
+            icon="search"
+            onChangeText={setQuery}
+            placeholder="Search product or category"
+            returnKeyType="search"
+            value={query}
           />
-        )}
 
-        <Text style={[styles.disclaimer, { color: colors.muted }]}>Prices are shown in Philippine pesos. Vaccines and medical products require clinic guidance and may involve separate professional services.</Text>
-      </ScrollView>
-      {cartCount > 0 ? <View style={{ padding: spacing.md, backgroundColor: colors.surface }}><AppButton title={`Review cart · ${cartCount} item${cartCount === 1 ? '' : 's'}`} onPress={() => navigation.navigate('ProductCheckout')} /></View> : null}
+          <ScrollView
+            contentContainerStyle={styles.categories}
+            horizontal
+            keyboardShouldPersistTaps="handled"
+            showsHorizontalScrollIndicator={false}
+            style={styles.categoryScroll}>
+            {categories.map((item) => {
+              const selected = item === category;
+              return (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  key={item}
+                  onPress={() => setCategory(item)}
+                  style={({ pressed }) => [
+                    styles.category,
+                    { backgroundColor: selected ? colors.primary : colors.surface, borderColor: selected ? colors.primary : colors.line },
+                    pressed && styles.pressed,
+                  ]}>
+                  <Text style={[styles.categoryText, { color: selected ? '#FFFFFF' : colors.inkSoft }]}>{item}</Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+
+          <View style={styles.resultsHead}>
+            <View>
+              <Text style={[styles.sectionTitle, { color: colors.ink }]}>Available at Vetrix</Text>
+              <Text accessibilityLiveRegion="polite" style={[styles.resultCount, { color: colors.muted }]}>{loading ? 'Loading products…' : resultLabel}</Text>
+            </View>
+            <View style={[styles.readOnlyBadge, { backgroundColor: colors.surfaceAlt, borderColor: colors.line }]}>
+              <AppIcon name="store" color={colors.muted} size={13} />
+              <Text style={[styles.readOnlyText, { color: colors.muted }]}>Clinic pickup</Text>
+            </View>
+          </View>
+
+          {loading ? (
+            <View>
+              <ProductCardSkeleton />
+              <ProductCardSkeleton />
+              <ProductCardSkeleton />
+            </View>
+          ) : visibleProducts.length ? (
+            visibleProducts.map((product, index) => <ProductCard delay={index * 45} key={product.id} product={product} quantity={cart[product.id] || 0} onChange={(quantity) => updateCart(product.id, quantity)} />)
+          ) : (
+            <EmptyState
+              icon="product"
+              message={query.trim() ? `No products match “${query.trim()}”. Try another name or category.` : 'No client-visible products are listed in this category.'}
+              title="No products found"
+            />
+          )}
+
+          <Text style={[styles.disclaimer, { color: colors.muted }]}>Prices are shown in Philippine pesos. Vaccines and medical products require clinic guidance and may involve separate professional services.</Text>
+        </ScrollView>
+        {cartCount > 0 ? <View style={{ padding: spacing.md, backgroundColor: colors.surface }}><AppButton title={`Review cart · ${cartCount} item${cartCount === 1 ? '' : 's'}`} onPress={() => navigation.navigate('ProductCheckout')} /></View> : null}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

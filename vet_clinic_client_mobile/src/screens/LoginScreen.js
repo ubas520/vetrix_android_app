@@ -56,7 +56,7 @@ export default function LoginScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: screenBackground }]}> 
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboard}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} enabled={Platform.OS !== 'web'} style={styles.keyboard}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <View style={styles.brandRow}>
             <View style={[styles.logo, { backgroundColor: colors.primary }]}><AppIcon name="pets" color="#FFFFFF" size={25} strokeWidth={2.4} /></View>
